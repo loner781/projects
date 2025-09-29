@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Bus - Transport Tracking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚌 Transport Tracking System</h1>
+        </header>
+        
+        <nav>
+            <a href="{{ url_for('index') }}" class="btn">← Home</a>
+            <a href="{{ url_for('login') }}" class="btn">Login</a>
+        </nav>
+        
+        <main>
+            <div class="tracking-container">
+                <h2>Real-Time Bus Tracking</h2>
+                
+                <!-- Route Information -->
+                <div class="route-info">
+                    <h3>Available Routes</h3>
+                    <div class="routes-grid">
+                        <div class="route-card">
+                            <h4>City Center Loop</h4>
+                            <p>Central Station → Mall Road → University → Hospital → Airport Road → Tech Park → Shopping Center → Residential Area</p>
+                        </div>
+                        <div class="route-card">
+                            <h4>Airport Express</h4>
+                            <p>Airport Terminal → Highway Junction → Business District → Central Station → Convention Center</p>
+                        </div>
+                        <div class="route-card">
+                            <h4>University Shuttle</h4>
+                            <p>University Main Gate → Library → Student Center → Sports Complex → Hostel Area → Cafeteria</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual Map Representation -->
+                <div class="map-container">
+                    <h3>Bus Locations</h3>
+                    <div id="map" class="simple-map">
+                        <div class="map-grid">
+                            <div class="map-cell" id="cell-0-0"></div>
+                            <div class="map-cell" id="cell-0-1"></div>
+                            <div class="map-cell" id="cell-0-2"></div>
+                            <div class="map-cell" id="cell-0-3"></div>
+                            <div class="map-cell" id="cell-0-4"></div>
+                            <div class="map-cell" id="cell-1-0"></div>
+                            <div class="map-cell" id="cell-1-1"></div>
+                            <div class="map-cell" id="cell-1-2"></div>
+                            <div class="map-cell" id="cell-1-3"></div>
+                            <div class="map-cell" id="cell-1-4"></div>
+                            <div class="map-cell" id="cell-2-0"></div>
+                            <div class="map-cell" id="cell-2-1"></div>
+                            <div class="map-cell" id="cell-2-2"></div>
+                            <div class="map-cell" id="cell-2-3"></div>
+                            <div class="map-cell" id="cell-2-4"></div>
+                            <div class="map-cell" id="cell-3-0"></div>
+                            <div class="map-cell" id="cell-3-1"></div>
+                            <div class="map-cell" id="cell-3-2"></div>
+                            <div class="map-cell" id="cell-3-3"></div>
+                            <div class="map-cell" id="cell-3-4"></div>
+                            <div class="map-cell" id="cell-4-0"></div>
+                            <div class="map-cell" id="cell-4-1"></div>
+                            <div class="map-cell" id="cell-4-2"></div>
+                            <div class="map-cell" id="cell-4-3"></div>
+                            <div class="map-cell" id="cell-4-4"></div>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <span class="legend-color bus-1"></span>
+                                <span>Bus 1 - City Center Loop</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color bus-2"></span>
+                                <span>Bus 2 - Airport Express</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color bus-3"></span>
+                                <span>Bus 3 - University Shuttle</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bus Information Table -->
+                <div class="bus-info">
+                    <h3>Live Bus Status</h3>
+                    <div id="bus-list">
+                        <div class="loading-indicator">
+                            <p>🔄 Loading bus locations...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="controls">
+                    <button onclick="refreshLocations()" class="btn">Manual Refresh</button>
+                    <button onclick="startTracking()" class="btn">Start Auto-Refresh</button>
+                    <button onclick="stopTracking()" class="btn">Stop Auto-Refresh</button>
+                    <div class="status-indicator">
+                        <span id="tracking-status">Auto-refresh is running</span>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="instructions">
+                    <h3>How It Works</h3>
+                    <ul>
+                        <li><strong>No GPS Required:</strong> This system uses predefined routes and simulated movement</li>
+                        <li><strong>Realistic Tracking:</strong> Buses follow actual route paths between stops</li>
+                        <li><strong>Auto-Refresh:</strong> Locations update every 3 seconds automatically when you visit this page</li>
+                        <li><strong>Route Visualization:</strong> The map shows bus positions on their respective routes</li>
+                        <li><strong>Manual Control:</strong> Use buttons to manually refresh or control auto-refresh</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Transport Tracking System</p>
+        </footer>
+    </div>
+    
+    <script>
+        let trackingInterval;
+        let busPositions = {};
+        
+        // Route definitions for visualization
+        const routes = {
+            1: { name: "City Center Loop", color: "bus-1", stops: 8 },
+            2: { name: "Airport Express", color: "bus-2", stops: 5 },
+            3: { name: "University Shuttle", color: "bus-3", stops: 6 }
+        };
+        
+        function updateMapVisualization(locations) {
+            // Clear previous bus positions
+            document.querySelectorAll('.map-cell').forEach(cell => {
+                cell.classList.remove('bus-1', 'bus-2', 'bus-3', 'bus-present');
+            });
+            
+            // Update bus positions on map
+            locations.forEach(location => {
+                const busId = location[0];
+                const lat = location[1];
+                const lon = location[2];
+                
+                // Convert coordinates to map grid position (simplified)
+                const gridX = Math.floor((lat - 12.95) * 100) % 5;
+                const gridY = Math.floor((lon - 77.58) * 100) % 5;
+                
+                const cellId = `cell-${gridY}-${gridX}`;
+                const cell = document.getElementById(cellId);
+                
+                if (cell) {
+                    cell.classList.add(routes[busId]?.color || 'bus-1', 'bus-present');
+                    cell.title = `Bus ${busId} - ${routes[busId]?.name || 'Unknown Route'}`;
+                }
+            });
+        }
+        
+        function refreshLocations() {
+            fetch('/api/get_locations')
+                .then(response => response.json())
+                .then(data => {
+                    const busList = document.getElementById('bus-list');
+                    
+                    if (data.length === 0) {
+                        busList.innerHTML = '<p>No bus locations found. Start the enhanced simulator to see buses moving!</p>';
+                        return;
+                    }
+                    
+                    // Group locations by bus ID to get latest position for each bus
+                    const latestLocations = {};
+                    data.forEach(location => {
+                        const busId = location[0];
+                        if (!latestLocations[busId] || location[3] > latestLocations[busId][3]) {
+                            latestLocations[busId] = location;
+                        }
+                    });
+                    
+                    // Update map visualization
+                    updateMapVisualization(Object.values(latestLocations));
+                    
+                    // Create bus status table
+                    let html = '<table class="bus-status-table"><thead><tr><th>Bus ID</th><th>Route</th><th>Status</th><th>Last Update</th></tr></thead><tbody>';
+                    
+                    Object.values(latestLocations).forEach(location => {
+                        const busId = location[0];
+                        const route = routes[busId] || { name: "Unknown Route" };
+                        const updateTime = new Date(location[3] * 1000).toLocaleString();
+                        const status = "In Transit";
+                        
+                        html += `<tr>
+                            <td>Bus ${busId}</td>
+                            <td>${route.name}</td>
+                            <td><span class="status-indicator active"></span> ${status}</td>
+                            <td>${updateTime}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    busList.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('bus-list').innerHTML = '<p>Error loading bus locations. Make sure the server is running.</p>';
+                });
+        }
+        
+        function startTracking() {
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+            }
+            trackingInterval = setInterval(refreshLocations, 3000); // Refresh every 3 seconds
+            refreshLocations(); // Initial load
+            document.getElementById('tracking-status').textContent = 'Auto-refresh is running';
+            document.getElementById('tracking-status').style.color = '#28a745';
+            console.log('Auto-refresh started');
+        }
+        
+        function stopTracking() {
+            if (trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+                document.getElementById('tracking-status').textContent = 'Auto-refresh stopped';
+                document.getElementById('tracking-status').style.color = '#dc3545';
+                console.log('Auto-refresh stopped');
+            }
+        }
+        
+        // Load initial data and auto-start tracking
+        refreshLocations();
+        
+        // Auto-start tracking immediately
+        startTracking();
+    </script>
+</body>
+</html>

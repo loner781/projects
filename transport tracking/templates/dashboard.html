@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Transport Tracking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚌 Transport Tracking System</h1>
+            <p>Welcome, {{ session.user }}!</p>
+        </header>
+        
+        <nav>
+            <a href="{{ url_for('add_bus') }}" class="btn">Add New Bus</a>
+            <a href="{{ url_for('track_bus') }}" class="btn">Track Buses</a>
+            <a href="{{ url_for('index') }}" class="btn">Home</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </nav>
+        
+        <main>
+            <div class="dashboard-container">
+                <h2>Bus Management Dashboard</h2>
+                
+                <div class="buses-section">
+                    <h3>Registered Buses</h3>
+                    {% if buses %}
+                        <table class="buses-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Bus Number</th>
+                                    <th>Route</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bus in buses %}
+                                <tr>
+                                    <td>{{ bus[0] }}</td>
+                                    <td>{{ bus[1] }}</td>
+                                    <td>{{ bus[2] }}</td>
+                                    <td>
+                                        <button onclick="trackBus({{ bus[0] }})" class="btn-small">Track</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No buses registered yet. <a href="{{ url_for('add_bus') }}">Add your first bus</a>!</p>
+                    {% endif %}
+                </div>
+                
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('add_bus') }}" class="btn">Add New Bus</a>
+                        <a href="{{ url_for('track_bus') }}" class="btn">View All Buses</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Transport Tracking System</p>
+        </footer>
+    </div>
+    
+    <script>
+        function trackBus(busId) {
+            window.location.href = "{{ url_for('track_bus') }}?bus_id=" + busId;
+        }
+    </script>
+</body>
+</html>

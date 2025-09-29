@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Bus - Transport Tracking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚌 Transport Tracking System</h1>
+        </header>
+        
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="btn">← Dashboard</a>
+            <a href="{{ url_for('track_bus') }}" class="btn">Track Buses</a>
+        </nav>
+        
+        <main>
+            <div class="add-bus-container">
+                <h2>Add New Bus</h2>
+                <form method="POST" class="bus-form">
+                    <div class="form-group">
+                        <label for="bus_number">Bus Number:</label>
+                        <input type="text" id="bus_number" name="bus_number" required 
+                               placeholder="e.g., BUS-001, Route-42">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="route">Route:</label>
+                        <input type="text" id="route" name="route" required 
+                               placeholder="e.g., Downtown to Airport, City Center Loop">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Add Bus</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+                
+                <div class="help-section">
+                    <h3>Instructions</h3>
+                    <ul>
+                        <li>Enter a unique bus number for identification</li>
+                        <li>Describe the route the bus will follow</li>
+                        <li>After adding, you can track the bus in real-time</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Transport Tracking System</p>
+        </footer>
+    </div>
+</body>
+</html>
